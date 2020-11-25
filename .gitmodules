@@ -1,0 +1,3 @@
+[submodule "docker-clion-cpp-env"]
+	path = docker-clion-cpp-env
+	url = https://github.com/eeberhard/docker-clion-cpp-env
