@@ -21,11 +21,32 @@ can achieve the necessary interface.
 
 ## Setup
 
-Use `sh build.sh` followed by `sh run.sh` to start a docker
-container with the build and debug environment. Then
-configure CLion accordingly.
+This repository uses some scripts and resources from [docker-clion-cpp-env](https://github.com/eeberhard/docker-clion-cpp-env),
+so when you clone it you also need to pull the submodule:
+```commandline
+git clone --recurse-submodules git https://github.com/eeberhard/zmq-robot-interface.git
+```
 
-Refer to [docker-clion-cpp-env](github.com/eeberhard/docker-clion-cpp-env) for more info.
+If you already cloned it but forgot to use the `--recurse-submodules` option, then 
+(inside the local copy) you can run:
+```commandline
+git submodule update --init --recursive
+```
+
+Once you have the repo and submodules checked out, build the docker image with:
+```commandline
+sh build.sh
+```
+If you haven't previously built the base `clion/remote-cpp-env` image, it will first
+ build that (which may take a while). Then, use:
+```commandline
+sh run.sh
+```
+to start a docker container with the build and debug environment. 
+
+Finally, configure CLion accordingly;
+refer to [docker-clion-cpp-env](https://github.com/eeberhard/docker-clion-cpp-env)
+for more info on remote development and CLion configuration. 
 
 ## Running
 
