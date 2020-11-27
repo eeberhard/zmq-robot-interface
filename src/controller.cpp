@@ -1,7 +1,10 @@
+#include "common.h"
+
 #include <iostream>
 #include <zmq.hpp>
 
-#include "common.h"
+// define the robot degrees of freedom for the message types
+const std::size_t dof = 3;
 
 int main() {
   std::cout << "Starting controller process" << std::endl;
@@ -16,16 +19,16 @@ int main() {
   zmq::socket_t pubCommand(context, ZMQ_PUB);
   pubCommand.bind("tcp://*:5564");
 
-  common::StateRepresentation state{};
-  common::CommandRepresentation command{};
+  common::StateMessage<dof> state{};
+  common::CommandMessage<dof> command{};
 
-  while (true) {
+  while (subState.connected()) {
     // blocking receive until we get a state from the robot
     if (common::receiveState(subState, state)) {
-      std::cout << "Received state " << state.jointPosition.j1 << std::endl;
+      common::printState(state);
 
       // then we generate a command and send it on another port
-      command.jointTorque.j1 = state.jointPosition.j1;
+      command.jointTorque[0] = state.jointPosition[0];
       common::publishCommand(pubCommand, command);
     }
 

@@ -5,8 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(cppzmq)
 
-add_executable(controller controller.cpp common.h)
+include_directories(BEFORE inc)
+
+add_executable(controller src/controller.cpp inc/common.h)
 target_link_libraries(controller cppzmq)
 
-add_executable(robot robot.cpp common.h)
+add_executable(robot src/robot.cpp inc/common.h)
 target_link_libraries(robot cppzmq)
