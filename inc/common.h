@@ -10,6 +10,8 @@
 
 namespace common {
 
+// --- Underlying message data types --- //
+
 template<std::size_t DOF>
 struct Joints {
   float& operator[](std::size_t i) {
@@ -32,14 +34,17 @@ struct Quaternion {
 };
 
 struct EEPose {
-  Vec3D position;
-  Quaternion orientation;
+  Vec3D position{};
+  Quaternion orientation{};
 };
 
 struct EETwist {
-  Vec3D linear;
-  Vec3D angular;
+  Vec3D linear{};
+  Vec3D angular{};
 };
+
+
+// --- Message structures --- //
 
 template<std::size_t DOF>
 struct StateMessage {
@@ -55,43 +60,34 @@ struct CommandMessage {
   Joints<DOF> jointTorque;
 };
 
-template<std::size_t DOF>
-bool publishState(zmq::socket_t& publisher, const StateMessage<DOF>& state) {
-  zmq::message_t message(sizeof(state));
-  memcpy(message.data(), &state, sizeof(state));
+
+// --- Transceiving function helpers --- //
+
+template<typename T>
+bool send(zmq::socket_t& publisher, const T& obj) {
+  zmq::message_t message(sizeof(obj));
+  memcpy(message.data(), &obj, sizeof(obj));
   auto res = publisher.send(message, zmq::send_flags::none);
 
   return res.has_value();
 }
 
-template<std::size_t DOF>
-bool receiveState(zmq::socket_t& subscriber, StateMessage<DOF>& state) {
+template<typename T>
+bool receive(zmq::socket_t& subscriber, T& obj, const zmq::recv_flags flags = zmq::recv_flags::none) {
   zmq::message_t message;
-  auto res = subscriber.recv(message, zmq::recv_flags::none);
+  auto res = subscriber.recv(message, flags);
   if (res) {
-    state = *message.data<StateMessage<DOF>>();
+    obj = *message.data<T>();
   }
   return res.has_value();
 }
 
-template<std::size_t DOF>
-bool publishCommand(zmq::socket_t& publisher, const CommandMessage<DOF>& command) {
-  zmq::message_t message(sizeof(command));
-  memcpy(message.data(), &command, sizeof(command));
-  auto res = publisher.send(message, zmq::send_flags::none);
-
-  return res.has_value();
+template<typename T>
+bool poll(zmq::socket_t& subscriber, T& obj) {
+  return receive(subscriber, obj, zmq::recv_flags::dontwait);
 }
 
-template<std::size_t DOF>
-bool pollCommand(zmq::socket_t& subscriber, CommandMessage<DOF>& command) {
-  zmq::message_t message;
-  auto res = subscriber.recv(message, zmq::recv_flags::dontwait);
-  if (res) {
-    command = *message.data<CommandMessage<DOF>>();
-  }
-  return res.has_value();
-}
+// --- Demo utilities --- //
 
 template<std::size_t DOF>
 void printState(StateMessage<DOF> state) {
@@ -107,9 +103,15 @@ void printState(StateMessage<DOF> state) {
   for (std::size_t joint = 0; joint < DOF; ++joint) {
     std::cout << state.jointTorque[joint] << "  ";
   }
+  std::cout << std::endl << "EE Pose [p, q]: ";
+  std::cout << state.eePose.position.x << "  " << state.eePose.position.y << "  " << state.eePose.position.z << ",  "
+            << state.eePose.orientation.w << "  " << state.eePose.orientation.x << "  "
+            << state.eePose.orientation.y << "  " << state.eePose.orientation.z;
+  std::cout << std::endl << "EE Twist [v, w]: ";
+  std::cout << state.eeTwist.linear.x << "  " << state.eeTwist.linear.y << "  " << state.eeTwist.linear.z << ",  "
+            << state.eeTwist.angular.x << "  " << state.eeTwist.angular.y << "  " << state.eeTwist.angular.z;
   std::cout << std::endl;
 }
-
 
 template<std::size_t DOF>
 void printCommand(CommandMessage<DOF> command) {

@@ -24,12 +24,12 @@ int main() {
 
   while (subState.connected()) {
     // blocking receive until we get a state from the robot
-    if (common::receiveState(subState, state)) {
+    if (common::receive(subState, state)) {
       common::printState(state);
 
       // then we generate a command and send it on another port
       command.jointTorque[0] = state.jointPosition[0];
-      common::publishCommand(pubCommand, command);
+      common::send(pubCommand, command);
     }
 
     // for demonstration the control loop sleeps to be much

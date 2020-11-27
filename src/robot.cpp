@@ -28,7 +28,7 @@ int main() {
   int count = 0;
   while (pubState.connected()) {
     // non-blocking poll of command
-    if (common::pollCommand(subCommand, command)) {
+    if (common::poll(subCommand, command)) {
       // Do something with the command here (e.g. update applied command)
       common::printCommand(command);
     }
@@ -38,7 +38,7 @@ int main() {
 
     // then send the state representation
     std::cout << "Send state " + std::to_string(count) << std::endl;
-    common::publishState(pubState, state);
+    common::send(pubState, state);
 
     // robot interface has real-time timing, but for demonstration we sleep here
     common::sleep(100);
