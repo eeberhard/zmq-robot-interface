@@ -63,6 +63,20 @@ struct CommandMessage {
 
 // --- Transceiving function helpers --- //
 
+zmq::socket_t bindPublisher(zmq::context_t& context, const char* address) {
+  zmq::socket_t publisher(context, ZMQ_PUB);
+  publisher.bind(address);
+  return publisher;
+}
+
+zmq::socket_t connectSubscriber(zmq::context_t& context, const char* address) {
+  zmq::socket_t subscriber(context, ZMQ_SUB);
+  subscriber.set(zmq::sockopt::conflate, 1);
+  subscriber.set(zmq::sockopt::subscribe, "");
+  subscriber.connect(address);
+  return subscriber;
+}
+
 template<typename T>
 bool send(zmq::socket_t& publisher, const T& obj) {
   zmq::message_t message(sizeof(obj));

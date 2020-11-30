@@ -10,16 +10,8 @@ int main() {
   std::cout << "Starting Robot process" << std::endl;
 
   zmq::context_t context(1);
-
-  // bind state publisher to a port
-  zmq::socket_t pubState(context, ZMQ_PUB);
-  pubState.bind("tcp://*:5563");
-
-  // connect command publisher to a port with no queue (conflate = 1)
-  zmq::socket_t subCommand(context, ZMQ_SUB);
-  subCommand.set(zmq::sockopt::conflate, 1);
-  subCommand.set(zmq::sockopt::subscribe, "");
-  subCommand.connect("tcp://localhost:5564");
+  auto pubState = common::bindPublisher(context, "tcp://*:5563");
+  auto subCommand = common::connectSubscriber(context, "tcp://localhost:5564");
 
   common::StateMessage<dof> state = {};
   common::CommandMessage<dof> command = {};

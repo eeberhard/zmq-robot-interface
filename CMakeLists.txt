@@ -7,8 +7,8 @@ find_package(cppzmq)
 
 include_directories(BEFORE inc)
 
-add_executable(controller src/controller.cpp inc/common.h)
+add_executable(controller src/controller.cpp)
 target_link_libraries(controller cppzmq)
 
-add_executable(robot src/robot.cpp inc/common.h)
+add_executable(robot src/robot.cpp)
 target_link_libraries(robot cppzmq)

@@ -10,14 +10,8 @@ int main() {
   std::cout << "Starting controller process" << std::endl;
 
   zmq::context_t context(1);
-
-  zmq::socket_t subState(context, ZMQ_SUB);
-  subState.set(zmq::sockopt::conflate, 1);
-  subState.set(zmq::sockopt::subscribe, "");
-  subState.connect("tcp://localhost:5563");
-
-  zmq::socket_t pubCommand(context, ZMQ_PUB);
-  pubCommand.bind("tcp://*:5564");
+  auto subState = common::connectSubscriber(context, "tcp://localhost:5563");
+  auto pubCommand = common::bindPublisher(context, "tcp://*:5564");
 
   common::StateMessage<dof> state{};
   common::CommandMessage<dof> command{};
